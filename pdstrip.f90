@@ -860,7 +860,7 @@ real:: ypr(nprmax,nsemax),zpr(nprmax,nsemax) !y and z of pressure points
 real:: pres2(nprmax,nsemax,nvmax,nmumax) !pressure response amplitude squared
 real:: h                             !significant wave height
 real:: t                             !significant period corr. to c.o.gravity of wave spectrum
-real:: mainmu                        !main direction of the seaway 
+real:: mainmu                        !main direction of the seaway
 real:: expon                         !e in angular spreading of wave energy acc. to cos^e(mu-mainmu)
 real:: spuh                          !peak enhancement factor in Jonswap spectrum
 real:: ompeak                        !circular frequency at peak of wave spectrum
@@ -914,11 +914,11 @@ Seaways: do
    if (h.eq.0) stop
    write(6,*) '--------------------------------------------------------------------------'
    write(6,*)
-   write(6,'('' Significant wave height                      '',F10.3)'), h
-   write(6,'('' Period T1 corr. to c.o.g. of spectrum        '',F10.3)'), t
-   write(6,'('' Central wave dir.(0 from stern, 90 from stb.)'',F10.3)'), hauptr
-   write(6,'('' Exponent n in cos^n angular spreading funct. '',F10.3)'), expon
-   write(6,'('' Peak enhancement factor (1 for P.-M.spectrum)'',F10.3)'), spuh
+   write(6,'('' Significant wave height                      '',F10.3)') h
+   write(6,'('' Period T1 corr. to c.o.g. of spectrum        '',F10.3)') t
+   write(6,'('' Central wave dir.(0 from stern, 90 from stb.)'',F10.3)') mainmu
+   write(6,'('' Exponent n in cos^n angular spreading funct. '',F10.3)') expon
+   write(6,'('' Peak enhancement factor (1 for P.-M.spectrum)'',F10.3)') spuh
 
    ! Preparations for integration
    ompeak=(4.65+0.182*spuh)/t
