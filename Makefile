@@ -20,4 +20,4 @@ clean:
 	rm -rf *.mod
 
 dist-clean: clean
-	rm -rf *~
+	rm -rf *~ svn-commit.tmp

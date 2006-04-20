@@ -1,3 +1,8 @@
+! Copyright (c) 1980-2006 Heinrich Söding
+!               2005-2006 Volker Bertram
+!
+! This is Free Software. For license terms, see the LICENSE file.
+
 module pdstripsubprograms
 implicit none
 
