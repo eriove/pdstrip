@@ -1,3 +1,7 @@
+! Copyright (c) 2005-2006 Gerrie Thiart
+!
+! This is Free Software. For license terms, see the LICENSE file.
+
 WINAPP
 
 PROGRAM PdStripGui

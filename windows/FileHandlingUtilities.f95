@@ -1,3 +1,7 @@
+! Copyright (c) 2005-2006 Gerrie Thiart
+!
+! This is Free Software. For license terms, see the LICENSE file.
+
 ! This module implements some file handlig utilities [Origin: Package Ellipsoid]
 MODULE FileHandlingUtilities
   IMPLICIT NONE    
