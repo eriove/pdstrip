@@ -20,4 +20,9 @@ clean:
 	rm -rf *.mod
 
 dist-clean: clean
-	rm -rf *~ svn-commit.tmp
+	rm -rf *~ svn-commit.tmp pdstrip
+	cd examples; $(MAKE) $@
+	cd windows; $(MAKE) $@
+
+pdstrip-%.tar.gz: dist-clean
+	cd ..; tar -cvzf $@ --exclude *.svn* pdstrip
