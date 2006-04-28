@@ -47,7 +47,8 @@ real:: zdrift                    !z coordinate for water particle drift velocity
 
 character(80):: text             !text describing the ship and its loading case
 character(80):: offsetfile       !name of the file containing the offset point data
-character(LEN = 128) :: pathName = ' ' ! used to make GUI in Windows work
+! GT/2006-04-28
+character(LEN = 128) :: pathName = ' ', fileName = 'pdstrip' ! used to make GUI in Windows work
 
 interface operator(.mprod.); module procedure prodmatr; end interface !matrix product
 interface operator(.vprod.); module procedure vectprod; end interface !vector product
@@ -1334,12 +1335,12 @@ character(80):: text1,skiptext
 INQUIRE(file='pdstrip.ini',exist=iniExists)   !used to make GUI in Windows work
 IF (iniExists) THEN
    OPEN(10,FILE='pdstrip.ini',STATUS='OLD')
-   READ(10,'(a)') pathName
+   READ(10,'(a, /, a)') pathName, fileName    ! GT/2006-04-28
    CLOSE(10)
 END IF
 
-open(5,file=TRIM(pathName)//'pdstrip.inp',status='old')
-open(6,file=TRIM(pathName)//'pdstrip.out',status='replace')
+open(5,file=TRIM(pathName)//TRIM(fileName)//'.inp',status='old')    ! GT/2006-04-28
+open(6,file=TRIM(pathName)//TRIM(fileName)//'.out',status='replace')    ! GT/2006-04-28
 read(5,*) npres,lsect,ltrans,lsign
 write(6,'(a,i3)') ' No. of pressure points per section ',npres
 write(6,'(a,a )') ' Section hydrodynamic data?         ',merge('yes',' no',lsect)
