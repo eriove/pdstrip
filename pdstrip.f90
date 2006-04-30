@@ -1019,7 +1019,8 @@ Seaways: do
                endif  
             enddo VariousResponses
             WithPressure: if (npres>0) then
-               signpres(1:npres,1:nse,iv)=signpres(1:npres,1:nse,iv)+ spi*pres2(1:npres,1:nse,iv,imu)*muin(imu)                            !signif. ampl. of pressure
+               signpres(1:npres,1:nse,iv)=signpres(1:npres,1:nse,iv)+ &
+                  spi*pres2(1:npres,1:nse,iv,imu)*muin(imu)                            !signif. ampl. of pressure
                barfxi (iv)=barfxi (iv)+spi*fxi (iv,imu)*muin(imu)                    !longitudinal drift force
                barfeta(iv)=barfeta(iv)+spi*feta(iv,imu)*muin(imu)                      !transverse drift force
                if (iv==1) then
@@ -1971,7 +1972,8 @@ Wavelengths: do iom=1,nom                                                       
                AllSails: do isail=1,nsail
                   baralpha=asin(sum(uwind*ssail(1:3,isail))/uwindabs/ssailabs(isail))
                   cn=max(-1.5,min(dcndasail(isail)*baralpha,1.5))
-                  sailfactor(1:3)=-uwind(1:3)*cn*ssailabs(isail) -pi/4.*cmsail(isail)*ciome*sqrt(sum(csail(1:3,isail)**2))*ssail(1:3,isail)
+                  sailfactor(1:3)=-uwind(1:3)*cn*ssailabs(isail) &
+                     -pi/4.*cmsail(isail)*ciome*sqrt(sum(csail(1:3,isail)**2))*ssail(1:3,isail)
                   if (abs(cn)<1.5) sailfactor=sailfactor-0.5*uwindabs*ssail(1:3,isail)*dcndasail(isail)
                   sailfactor(1:3)=sailfactor(1:3)*ciome
                   addedmass(:,:,1)=addedmass(:,:,1)+(rhovsail(:,:,isail).mprod. &
@@ -2072,7 +2074,8 @@ Wavelengths: do iom=1,nom                                                       
            AllIntersections: do ise=2,nse
               is=ise
               xs=(x(ise)+x(ise-1))/2.
-              sectionforce=vsmatr(:,:,is).mprod.(((restorematr(:,:,is)-addedmass(:,:,is)-ome**2*massmatr(:,:,is)).mprod.motion)-ex(:,:,is))
+              sectionforce=vsmatr(:,:,is).mprod.&
+                 (((restorematr(:,:,is)-addedmass(:,:,is)-ome**2*massmatr(:,:,is)).mprod.motion)-ex(:,:,is))
               write(6,'('' Force '',f7.2,f12.3,2f13.3,2(1x,3f13.3))') xs,(sectionforce(i,1),abs(sectionforce(i,1)),i=1,3)
               write(6,'('' Moment  '',3x,3(1x,3f13.3))') (sectionforce(i,1),abs(sectionforce(i,1)),i=4,6)
               write(21,*) (betr2(sectionforce(i,1)),i=1,6)
@@ -2117,7 +2120,8 @@ Wavelengths: do iom=1,nom                                                       
            if (ks.ne.0) stop'>> Singular system of equations for modified motion'
            motionmod=lineqmatr(:,7:7)
            Sectns: do ise=1,nse
-              write(6,'(a,a)') ' Sect. point  coord(2)  coord(3)     Re(p)     Im(p)       |p|','     ___wave component of p___      potential'
+              write(6,'(a,a)') ' Sect. point  coord(2)  coord(3)     Re(p)     Im(p)       |p|',&
+                 '     ___wave component of p___      potential'
               pres(:,:,ise)=pwg(:,:,ise)+(prs(:,:,ise).mprod.motionmod)
               pot=((prw(:,:,ise).mprod.motion)+pw(:,:,ise))/rho
               write(24,*) iom,iv,imu,ise
