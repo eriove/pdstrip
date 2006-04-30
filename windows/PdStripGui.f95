@@ -9,7 +9,7 @@ PROGRAM PdStripGui
   USE PdStripGuiControl, ONLY : InitializePdStrip, mainCaption, progStatus, mainWinControl, handleAppl, &
                                  inputFileOk, inputFileOpen, inputFileClosed, inputFileName, frameWidth, frameDepth
   IMPLICIT NONE
-  EXTERNAL LoadNewInputFile$, CommandsInfo$, AboutPdStripGui$, AboutPdStrip$, GetInputFile$, LoadNewInputFile$, CloseInputFile$, &
+  EXTERNAL CommandsInfo$, AboutPdStripGui$, AboutPdStrip$, GetInputFile$, LoadNewInputFile$, CloseInputFile$, &
             InputErrorCheck$, Compute$, ClosePdStripGui$
   INTEGER :: mainWin, WINIO@
   CALL InitializePdStrip
@@ -124,7 +124,7 @@ INTEGER FUNCTION Compute$()
   USE PdStripGuiControl, ONLY : progStatus, launchedStatus, doneStatus, pathName, inputFileName, inputFileInfo, inputFileOk, &
                                  messageWinControl 
   IMPLICIT NONE 
-  LOGICAL :: isOk
+!  LOGICAL :: isOk
   INTEGER :: WINIO@, statusWin, commandFail
   IF (inputFileInfo(13).EQ.1) THEN
     CALL SaveInputFileChanges
