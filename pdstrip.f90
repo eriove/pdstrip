@@ -27,7 +27,7 @@ integer:: ngap                   !number of `gaps' of a section
 integer:: gap(10)                !offset point index where a gap begins
 integer:: nmu                    !number of wave angles in hydrodynamic section calculations
 
-real, parameter:: pi=3.14159 
+real, parameter:: pi=3.14159
 real:: wangl(nmumax)             !wave angles in hydrodynamic section calculations
 real:: g                         !gravity acceleration
 real:: rho                       !water density
@@ -70,8 +70,8 @@ complex:: frkr(3,nmumax,nfremax) !Froude-Krilow force amplitude vector
 complex:: pr(nprmax,3+nmumax,nfremax) !pressure amplitude at pressure points on section contour
 
 fp=(/0.01,0.015, 0.020,.025,.031,.04,.05,.063,.08,.10,.12,.15,.19,.24,.31,.39, &
- .47,.55,.62,.70,.80,.90,1.0,1.1,1.25,1.4,1.55,1.7,1.9,2.2,2.4,2.7,3.0,3.3,3.6,4.0, &
- 4.5,5.2,6.,7.,8.,9.,10.5,12.0,13.5,15.,17.,20.,25.,30.,40.,50./)     !standard frequency parameters
+   .47,.55,.62,.70,.80,.90,1.0,1.1,1.25,1.4,1.55,1.7,1.9,2.2,2.4,2.7,3.0,3.3,3.6,4.0, &
+   4.5,5.2,6.,7.,8.,9.,10.5,12.0,13.5,15.,17.,20.,25.,30.,40.,50./)     !standard frequency parameters
 
 !nfre=3; fp(1:3)=(/0.1,1.,10./)  !only for rapid testing
 
@@ -83,9 +83,9 @@ write(6,'(/'' Gravity acceleration          '',f 8.3)') g
 write(6,'( '' Water density                 '',f 8.3)') rho
 write(6,'( '' z of still waterline          '',f 8.3)') zwl
 write(6,'( '' z of water bottom             '',g12.3)') zbot
-write(6,'( '' z for water drift velocity    '',f 8.3)') zdrift 
+write(6,'( '' z for water drift velocity    '',f 8.3)') zdrift
 write(6,'( '' Wave encounter angles         '',(10f8.3))') wangl(1:nmu)
-write(6,'(a,a)') ' Offset file name: ',trim(offsetfile) 
+write(6,'(a,a)') ' Offset file name: ',trim(offsetfile)
 if (nmu>nmumax) stop'>> Too many wave angles'
 if (zbot>0) write(6,*)'*** positive bottom z coordinate appears unreasonable'
 zwl=-zwl; zbot=-zbot; zdrift=-zdrift                      !change from input to output coord. system
@@ -110,7 +110,7 @@ Sections: do ise=1,nse
    if (ngap>0) write(6,'(a,10i5)') ' Gaps following point no.',gap(1:ngap)
    write(6,'(" y:",8f10.3)') yof(ise,1:nof(ise))
    write(6,'(" z:",8f10.3)') zof(ise,1:nof(ise))
-   if (sym.and.yof(ise,1)/=0)stop'First y must be 0 for symmetrical body' 
+   if (sym.and.yof(ise,1)/=0)stop'First y must be 0 for symmetrical body'
    yof(ise,1:nof(ise))=-yof(ise,1:nof(ise))
    zof(ise,1:nof(ise))=-zof(ise,1:nof(ise))                 !change from input to output coord. system
    area(ise)=0; ys(ise)=0; zs(ise)=0            !compute area etc. gaps covered 2 times if sym=.false.
@@ -145,7 +145,7 @@ Sections: do ise=1,nse
    yof1(1:nof(ise))=yof(ise,1:nof(ise)); zof1(1:nof(ise))=zof(ise,1:nof(ise))
    if (lsect) then
       call sectionhydrodynamics(nof(ise),yof1,zof1,nfre,om,addedm,diff,frkr,pr)
-      Frequencies: do i=1,nfre  
+      Frequencies: do i=1,nfre
          write(20,*) om(i),nmu,wangl(1:nmu)*pi/180                 !store on file sectionresults: wave data
          write(20,*) (om(i)**2*addedm(j,1:3,i),j=1,3)                                      !radiation force
          write(20,*) (diff(j,1:nmu,i),j=1,3)                                             !diffraction force
@@ -156,13 +156,13 @@ Sections: do ise=1,nse
 enddo Sections
 if (lsect) then
    write(20,*) npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/)) &
-   +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot    !test number for unchanged input data
+      +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot    !test number for unchanged input data
 end if
 end subroutine sectiondata
 
 subroutine sectionhydrodynamics(nof1,yof1,zof1,nfre,om,addedm,diff,frkr,pr)
 integer, intent(in):: nof1             !number of offset points on one section
-integer:: nfre                         !number of wave frequencies 
+integer:: nfre                         !number of wave frequencies
 integer:: i,ii                         !indices
 integer:: iom                          !index of frequency
 integer:: ileft(nprmax)                !index of offset point following a pressure point
@@ -183,7 +183,7 @@ if (nfre.gt.nfremax) stop'>> Too many frequencies'
 call testsuitability(nof1,yof1,zof1)                            !discretization of section suitable?
 girth(1)=0.
 do i=2,nof1
-   if (ngap>0.and.any(gap(1:ngap)==i-1)) then 
+   if (ngap>0.and.any(gap(1:ngap)==i-1)) then
       girth(i)=girth(i-1); cycle
    endif
    girth(i)=girth(i-1)+sqrt((yof1(i)-yof1(i-1))**2+(zof1(i)-zof1(i-1))**2)
@@ -193,20 +193,20 @@ PressurePoints: do ii=1,npres                                           !ii inde
    i=which(nof1-1,u<=girth(2:nof1))+1                       !pressure point between ileft-1 and ileft
    ileft(ii)=i
    aint(ii)=(u-girth(i-1))/(girth(i)-girth(i-1))     !intp=val(ileft-1)+aint*(val(ileft)-val(ileft-1))
-   write(24,*)yof1(i-1)+aint(ii)*(yof1(i)-yof1(i-1)),zof1(i-1)+aint(ii)*(zof1(i)-zof1(i-1)) 
+   write(24,*)yof1(i-1)+aint(ii)*(yof1(i)-yof1(i-1)),zof1(i-1)+aint(ii)*(zof1(i)-zof1(i-1))
 enddo PressurePoints
 Frequencies: do iom=1,nfre
    Symmetry: if (sym) then
       addedm(1:3,1:3,iom)=0
       call addedmassexcitations(nof1,yof1,zof1,om(iom),1,addedm(2,2,iom),diff(2,1:nmu,iom), &
-      frkr(2,1:nmu,iom))
+         frkr(2,1:nmu,iom))
       call addedmassexcitations(nof1,yof1,zof1,om(iom),2,addedmprel,diffprel,frkrprel)
       addedm(1:3:2,1:3:2,iom)=addedmprel
       diff(1:3:2,1:nmu,iom)=diffprel(1:2,1:nmu)
       frkr(1:3:2,1:nmu,iom)=frkrprel(1:2,1:nmu)
    else symmetry
       call addedmassexcitationa(nof1,yof1,zof1,om(iom),addedm(1,1,iom),diff(1,1,iom), &
-      frkr(1,1,iom),pr(1,1,iom),ileft,aint)
+         frkr(1,1,iom),pr(1,1,iom),ileft,aint)
    endif Symmetry
 enddo Frequencies
 end subroutine sectionhydrodynamics
@@ -236,7 +236,7 @@ end function pqnb
 function pqs(yof,zof,yq,zq,mp)                                           !=pq with y=0 mirror source
 integer:: mp                                                 !and possibly with bottom mirror source
 real:: pqs,yof,zof,yq,zq
-pqs=pq(yof-yq,zof-zq)+mp*pq(yof+yq,zof-zq)    
+pqs=pq(yof-yq,zof-zq)+mp*pq(yof+yq,zof-zq)
 if (zbot<1000.) pqs=pqs+pq(yof-yq,zof-(2*zbot-zq))+mp*pq(yof+yq,zof-(2*zbot-zq))
 end function pqs
 
@@ -245,15 +245,15 @@ integer:: mp
 real:: pqsn,yof1,zof1,yof2,zof2,yq,zq                       !and possibly with bottom mirror sources
 pqsn=pqn(yof1-yq,zof1-zq,yof2-yq,zof2-zq)+mp*pqn(yof1+yq,zof1-zq,yof2+yq,zof2-zq)
 if (zbot<1000.) pqsn=pqsn+pqn(yof1-yq,zof1-(2*zbot-zq),yof2-yq,zof2-(2*zbot-zq)) &
- +mp*pqn(yof1+yq,zof1-(2*zbot-zq),yof2+yq,zof2-(2*zbot-zq))  
+   +mp*pqn(yof1+yq,zof1-(2*zbot-zq),yof2+yq,zof2-(2*zbot-zq))
 end function pqsn
 
-subroutine addedmassexcitationa(nof1,yof1,zof1,om,addedm1,diff1,frkr1,pr,ileft,aint) 
-! added mass and wave excitation, deep and shallow water, asymmetrical section allowed 
+subroutine addedmassexcitationa(nof1,yof1,zof1,om,addedm1,diff1,frkr1,pr,ileft,aint)
+! added mass and wave excitation, deep and shallow water, asymmetrical section allowed
 ! bottom at zbot, surface at zwl. determines also pressure at interpolated points.
-! for deep water use zbot=1.e6. water density 1 assumed. 
+! for deep water use zbot=1.e6. water density 1 assumed.
 ! computes complex added mass = mass-i/omegae*damping for sway,heave,roll (3*3 matrix)
-! and diffraction and Froude-Krilow forces diff,frkr for nmu wave angles wangl (degree) 
+! and diffraction and Froude-Krilow forces diff,frkr for nmu wave angles wangl (degree)
 ! section offset points from starboard waterline point over basis to port wl point
 ! +y to starboard; +z downwards. first and last point should be on waterline.
 integer, intent(in):: nof1             !no. of offset points on a section
@@ -290,7 +290,7 @@ if (nof1+nfs>nofmax) stop'*** Too many body + waterline panels'
 if (nmu.gt.nmumax) stop'*** Too many angles'
 if (.not.subm.and.(abs(zof1(1)-zwl)>0.001.or.abs(zof1(nof1)-zwl) >0.001)) stop'*** First or last section point not on waterline'
 addedm1=0.; diff1=0; pr=0
-TwoFreeSurfaceDiscretisations: do nf=25,28,3 
+TwoFreeSurfaceDiscretisations: do nf=25,28,3
    ciom=(0.,1.)*om
    t=zbot-zwl                                                                           !t=water depth
    waven=max(om**2/g,om/sqrt(g*t))                                                        !wave number
@@ -312,8 +312,8 @@ TwoFreeSurfaceDiscretisations: do nf=25,28,3
       yq(i)=(yof1(k)+yof1(k+1))/2-(zof1(k+1)-zof1(k))/20                   !source points within section
       zq(i)=(zof1(k)+zof1(k+1))/2+(yof1(k+1)-yof1(k))/20
    enddo BodySegments
-   FreeSurfaceSegments: do k=nof1,nof1+nfs-1 
-      h=min(h*1.5,hend) 
+   FreeSurfaceSegments: do k=nof1,nof1+nfs-1
+      h=min(h*1.5,hend)
       yof1(k+1)=yof1(k)-h
       yof1(nfs+k+1)=merge(yof1(1),yof1(nfs+k),k==nof1)+h
       zof1(k+1)=zwl
@@ -332,12 +332,12 @@ TwoFreeSurfaceDiscretisations: do nf=25,28,3
    j=0                                                        !j=index of body segments excluding gaps
    BodySegm: do k=1,nof1-1
       if (ngap>0.and.any(gap(1:ngap)==k)) cycle
-      j=j+1     
+      j=j+1
       dy=yof1(k+1)-yof1(k)
       dz=zof1(k+1)-zof1(k)
       a(j,nof1-ngap+2*nfs  )=-ciom*dz
       a(j,nof1-ngap+2*nfs+1)=+ciom*dy
-      a(j,nof1-ngap+2*nfs+2)=+ciom*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)/2 
+      a(j,nof1-ngap+2*nfs+2)=+ciom*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)/2
       WaveAngles: do iw=1,nmu
          sinw=sin(wangl(iw)*pi/180)
          zw1=cmplx(-waven*dz,waven*sinw*dy)
@@ -369,7 +369,7 @@ TwoFreeSurfaceDiscretisations: do nf=25,28,3
       dy=yof1(k1+1)-y1
       AllSources: do i=0,nof1-ngap+2*nfs-1      !2-point integration (.316,.684) correct in case of k1=i
          a(k1-ngap,i)=pqnb(y1,zwl,yof1(k1+1),zwl,yq(i),zq(i))*merge(1,-1,k==k1) &
-             +om**2/g*abs(dy)*(pqb(y1+0.316*dy,zwl,yq(i),zq(i))+pqb(y1+0.684*dy,zwl,yq(i),zq(i)))/2 
+            +om**2/g*abs(dy)*(pqb(y1+0.316*dy,zwl,yq(i),zq(i))+pqb(y1+0.684*dy,zwl,yq(i),zq(i)))/2
       enddo AllSources
    enddo FreeSSegmentsNear
 
@@ -381,14 +381,14 @@ TwoFreeSurfaceDiscretisations: do nf=25,28,3
       if (k/=k1) factor=(real(k1-(nof1+nfs+nf))/(nfs-nf))**2
       AllColumns: do i=0,nof1-ngap+2*nfs-1
          a(k1-ngap,i)=waven*abs(dy)* &
-                 (pqb(yof1(k1)+0.316*dy,zwl,yq(i),zq(i))+pqb(yof1(k1)+0.684*dy,zwl,yq(i),zq(i)))/2 &
-        -(0.,1.)*(pqb(yof1(k1+1)-factor*dy,zwl,yq(i),zq(i))-pqb(yof1(k1)-factor*dy,zwl,yq(i),zq(i))) 
+            (pqb(yof1(k1)+0.316*dy,zwl,yq(i),zq(i))+pqb(yof1(k1)+0.684*dy,zwl,yq(i),zq(i)))/2 &
+            -(0.,1.)*(pqb(yof1(k1+1)-factor*dy,zwl,yq(i),zq(i))-pqb(yof1(k1)-factor*dy,zwl,yq(i),zq(i)))
       enddo AllColumns
    enddo FarSegments
 
    a(0,0:nof1-ngap+2*nfs-1)=1.                                           ! sum of source strengths = 0
    call simqcd(a(0,0),nof1-ngap+2*nfs,3+nmu,nofmax+1,is,1.e-5,detl)             !solve equation system
-   if (is.ne.0) stop'*** Singular equation system. Coinciding offset points?' 
+   if (is.ne.0) stop'*** Singular equation system. Coinciding offset points?'
 
    !Added mass and diffraction calc. by pressure integration over section contour
    Forces: do m=1,3                                 !for transverse force, vertical force, roll moment
@@ -399,15 +399,15 @@ TwoFreeSurfaceDiscretisations: do nf=25,28,3
             dy=yof1(k+1)-yof1(k)
             dz=zof1(k+1)-zof1(k)
             if (m==1) then
-			   fact=-dz                                                       !horizontal force
+               fact=-dz                                                       !horizontal force
             elseif (m==2) then
-			   fact=+dy                                                     !vertical force
+               fact=+dy                                                     !vertical force
             else
-			   fact=+0.5*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)                  !m==3; moment
+               fact=+0.5*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)                  !m==3; moment
             endif
             ForAllSources: do i=0,nof1-ngap+2*nfs-1
-               f=f+a(i,nof1-ngap+2*nfs-1+l)*fact*(pqb(yof1(k)+0.316*dy,zof1(k)+0.316*dz,yq(i),zq(i)) &     
-                 +pqb(yof1(k)+0.684*dy,zof1(k)+0.684*dz,yq(i),zq(i)))/2               !/2 for two-point integr.
+               f=f+a(i,nof1-ngap+2*nfs-1+l)*fact*(pqb(yof1(k)+0.316*dy,zof1(k)+0.316*dz,yq(i),zq(i)) &
+                  +pqb(yof1(k)+0.684*dy,zof1(k)+0.684*dz,yq(i),zq(i)))/2               !/2 for two-point integr.
             enddo ForAllSources
          enddo AllBodySegments
          RadiationDiffraction: if (l<=3) then        !added mass = -force /acceleration; pr.=-rho i om phi
@@ -422,7 +422,7 @@ TwoFreeSurfaceDiscretisations: do nf=25,28,3
    WithPressure: if (npres>0) then
       Motions: do l=1,3+nmu
          Offsets: do k=1,nof1
-            phiatoffsets(k)=0. 
+            phiatoffsets(k)=0.
             Sources: do i=0,nof1-ngap+2*nfs-1
                phiatoffsets(k)=phiatoffsets(k)+a(i,nof1-ngap+2*nfs-1+l)*pqb(yof1(k),zof1(k),yq(i),zq(i))
             enddo Sources
@@ -438,7 +438,7 @@ end subroutine addedmassexcitationa
 
 subroutine addedmassexcitations(nof1,yof1,zof1,om,ndof,addedm1,diff1,frkr1)
 ! added mass and wave excitation for deep and shallow water, symmetrical section
-! bottom at zbot, surface at zwl. for deep water use zbot=1.e6. water density 1 assumed. 
+! bottom at zbot, surface at zwl. for deep water use zbot=1.e6. water density 1 assumed.
 ! complex added mass = mass-i/omegae*damping for vertical (ndof=1; 1x1 matrix) or
 ! horizontal/roll motion (ndof=2; 2x2 matrix) as well as vertical (ndof=1) diffraction
 ! and Froude-Krilow forces or horizontal force and roll moment (ndof=2)
@@ -473,9 +473,9 @@ complex:: frkr1(ndof,nmu)              !Froude-Krilow force amplitude, one secti
 complex:: zw1,zw2,zw1a,zw2a            !intermediate values
 
 if (nof1.gt.50) stop'*** Too many points on section. should be <=50'
-if (ndof.ne.1.and.ndof.ne.2) stop'*** Incorrect ndof. should be 1 or 2' 
+if (ndof.ne.1.and.ndof.ne.2) stop'*** Incorrect ndof. should be 1 or 2'
 if (nmu.gt.nmumax) stop'*** Too many angles'
-if (nof1+nfs>nofmax) stop'*** Too many body + waterline panels'      
+if (nof1+nfs>nofmax) stop'*** Too many body + waterline panels'
 addedm1=0.
 diff1=0.
 twofreesurfacediscretisations: do nf=25,28,3                   !uses two values nf; results averaged
@@ -549,8 +549,8 @@ twofreesurfacediscretisations: do nf=25,28,3                   !uses two values 
             frkr1(1,iw)=frkr1(1,iw)+fact1*(0.,2.)*aimag(zw2)*dz*rho
             frkr1(2,iw)=frkr1(2,iw)-fact1*(0.,1.)*aimag(zw2)*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)*rho
             ShallowWater: if (fact2/=0) then
-               a(j,nof1-ngap+nfs-1+ndof+iw)=a(j,nof1-ngap+nfs-1+ndof+iw)+fact2*waven/om*real(cmplx( sinw*dz,dy)*zw2a)  
-               frkr1(1,iw)=frkr1(1,iw)+fact2*(0.,2.)*aimag(zw2a)*dz*rho 
+               a(j,nof1-ngap+nfs-1+ndof+iw)=a(j,nof1-ngap+nfs-1+ndof+iw)+fact2*waven/om*real(cmplx( sinw*dz,dy)*zw2a)
+               frkr1(1,iw)=frkr1(1,iw)+fact2*(0.,2.)*aimag(zw2a)*dz*rho
                frkr1(2,iw)=frkr1(2,iw)-fact2*(0.,1.)*aimag(zw2a)*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)*rho
             endif ShallowWater
          endif                                                                         !heave or sway/roll
@@ -566,7 +566,7 @@ twofreesurfacediscretisations: do nf=25,28,3                   !uses two values 
       AllSources:do i=ndof-1,nof1-ngap+nfs-1            !2-point integration for correct integral at k=i
          a(k-ngap,i)=pqsn(yof1(k),zwl,yof1(k+1),zwl,yq(i),zq(i),mp) &
             +om**2/g*abs(dy)*(pqs(yof1(k)+0.316*dy,zwl,yq(i),zq(i),mp) &
-            +pqs(yof1(k)+0.684*dy,zwl,yq(i),zq(i),mp))/2 
+            +pqs(yof1(k)+0.684*dy,zwl,yq(i),zq(i),mp))/2
       enddo AllSources
    enddo FreeSSegmentsNear
 
@@ -584,7 +584,7 @@ twofreesurfacediscretisations: do nf=25,28,3                   !uses two values 
 
    if (ndof==1) a(0,0:nof1-ngap+nfs-1)=1.                      !sum of sources = 0 only in case ndof=1
    call simqcd(a(ndof-1,ndof-1),nof1-ngap+nfs+1-ndof,ndof+nmu,nofmax+1,is,1.e-5,detl) !solve equations
-   if (is.ne.0) stop'***  Singular equation system. Coinciding offset points?' 
+   if (is.ne.0) stop'***  Singular equation system. Coinciding offset points?'
 
    Forces: do m=1,ndof                                             !ndof=1 heave, ndof=2 sway and roll
       MotionsAndWaves: do l=1,ndof+nmu                                    !m force index, l motion index
@@ -594,18 +594,18 @@ twofreesurfacediscretisations: do nf=25,28,3                   !uses two values 
             dy=yof1(k+1)-yof1(k)
             dz=zof1(k+1)-zof1(k)
             if (mp.eq.1) then
-			   fact=+dy                                                        !heave motion
+               fact=+dy                                                        !heave motion
             else
                if (m.eq.1) fact=-dz
                if (m.eq.2) fact=+0.5*(yof1(k+1)**2-yof1(k)**2+zof1(k+1)**2-zof1(k)**2)
             endif
             ForAllSources: do i=ndof-1,nof1-ngap+nfs-1
                f(m,l)=f(m,l)+a(i,nof1-ngap+nfs-1+l)*fact* &
-                      (pqs(yof1(k)+0.316*dy,zof1(k)+0.316*dz,yq(i),zq(i),mp)     &   
+                      (pqs(yof1(k)+0.316*dy,zof1(k)+0.316*dz,yq(i),zq(i),mp) &
                       +pqs(yof1(k)+0.684*dy,zof1(k)+0.684*dz,yq(i),zq(i),mp))/2
             enddo ForAllSources
          enddo AllBodySegments
-         if (l<=ndof) then   
+         if (l<=ndof) then
             addedm1(m,l)=addedm1(m,l)+ciom*f(m,l)/(-om**2)*rho
          else
             diff1(m,l-ndof)=diff1(m,l-ndof)-ciom*f(m,l)*rho
@@ -628,8 +628,8 @@ real:: dy,dz                           !coordinate differences of offset points
 real:: yq,zq                           !y, z of sources
 real:: yof2(nofmax),zof2(nofmax)       !y, z of original offset points (possibly of half section)
 real:: angle                           !angle under which section contour is seen from a source
-real:: ay,az,by,bz                     !y, z coordinate difference between source and offset point 
-  
+real:: ay,az,by,bz                     !y, z coordinate difference between source and offset point
+
 if (sym) then                           !complement section by mirror image in fields yof1,zof1,gap1
    yof1(nof1:2*nof1-1)=yof2(1:nof1)
    zof1(nof1:2*nof1-1)=zof2(1:nof1)
@@ -662,7 +662,7 @@ do i=1,nof1neu                                                     !generate int
    yofi(i)=yof1(i)-dz/15
    zofi(i)=zof1(i)+dy/15
 enddo
-Sources: do k=1,nof1neu-1 !for all source points  
+Sources: do k=1,nof1neu-1 !for all source points
    if (ngapneu>0.and.any(gap1(1:ngapneu)==k)) cycle                                       !not at gaps
    yq=(yof1(k)+yof1(k+1))/2-(zof1(k+1)-zof1(k))/20
    zq=(zof1(k)+zof1(k+1))/2+(yof1(k+1)-yof1(k))/20
@@ -702,7 +702,7 @@ end function betr2
 
 subroutine simqcd(a,n,nr,im,i,s,detl)
 ! Gauss algorithm for a complex linear equation system. Full matrix, several inhomogeneous vectors.
-! a(row,column)=complex coefficient matrix + NEGATIVE right-hand sides as additional columns. When 
+! a(row,column)=complex coefficient matrix + NEGATIVE right-hand sides as additional columns. When
 ! finished right-hand sides are replaced by the solutions. Coefficient matrix is destroyed.
 ! n=no. of equations (rows), nr no. of right-hand sides, im range of first index of a.
 ! i=0 after normal solutions, /=0 if a pivot is <s (singular or near-singular matrix a).
@@ -754,7 +754,7 @@ do i=mmr,nnr-1,im
 enddo
 i=0
 end subroutine simqcd
-  
+
 function fillcomplmatr(nr,nc,elements) !generates complex matrix from complex elements
 integer:: nr,nc,ir,ic,i
 complex:: fillcomplmatr(nr,nc),elements(nr*nc) !elements: 1st row, 2nd row ...
@@ -853,7 +853,7 @@ real:: bewf(30)                      !acceleration valuation factors
 real:: muf(-nmumax:2*nmumax)         !wave angles
 real:: muin(-nmumax:2*nmumax)        !integral of wave energy spreading function over wave angle
 real:: fr(10)                        !frequencies for defining acceleration valuation function
-real:: maxdampken(6*(nsemax+(nbmax*3)/2),nvmax) !max. contrib. of one frequency interval to ampken 
+real:: maxdampken(6*(nsemax+(nbmax*3)/2),nvmax) !max. contrib. of one frequency interval to ampken
 real:: fxi(nvmax,nmumax)             !long. drift force in regular wave per wave amplitude^2
 real:: feta(nvmax,nmumax)            !transverse drift force in regular wave per wave amplitude^2
 real:: barfxi(nvmax)                 !long. drift force in a seaway
@@ -878,7 +878,7 @@ real:: mu                            !wave angle
 real:: omzw                          !intermediate circular frequency within one frequency interval
 real:: bvh                           !non-dim. breadth of peak enhancement in Jonswap spectrum
 real:: omv                           !non-dimensional frequency in Jonswap spectrum
-real:: sjonsw                        !Jonswap spectral ordinate 
+real:: sjonsw                        !Jonswap spectral ordinate
 real:: rml                           !mass of suspended load
 real:: skip                          !used to skip values when reading a file
 real:: ome                           !encounter circular frequency
@@ -909,7 +909,7 @@ Seaways: do
    read(21,'(a)')text1                                                 !general data read from file 21
    if (text1.ne.text) then
       write(6,*)text1
-	  write(6,*)text
+      write(6,*)text
       stop'>> File 21 does not fit to the input data'
    endif
    read(21,*) nb,ls,g,rho,rml         !reads data for nmu,muf complemented to cover [-90 : 270] degrees
@@ -948,8 +948,8 @@ Seaways: do
       rmgl=(merge(muf(imu-1),muf(nmu)-2*pi,imu>1)+muf(imu))/2.               !left end of interval
       rmbe=(merge(muf(imu+1),muf(1)+2*pi,imu<nmu)+muf(imu))/2.-rmgl          !range of interval
       if (rmbe>0.78.and.abs(rmgl-mainmu*pi/180)<0.5*pi) then
-	     stop'>> The specified wave angles are not sufficient for this seaway'
-	  end if
+         stop'>> The specified wave angles are not sufficient for this seaway'
+      end if
       npart=rmbe/0.02+1
       muin(imu)=0
       Parts: do ipart=1,npart
@@ -957,12 +957,12 @@ Seaways: do
          if (    modulo(mainmu*pi/180-mu,2*pi).lt.pi/2. &
              .or.modulo(mainmu*pi/180-mu,2*pi).gt.pi*3/2.) then
             muin(imu)=muin(imu)+(cos(mainmu*pi/180-mu))**expon*rmbe/npart
-		 end if
+         end if
       enddo Parts
       sumrm=sumrm+muin(imu)
    enddo WaveAngles
    muin(1:nmu)=muin(1:nmu)/sumrm
- 
+
 
    ! Integration over omega for all responses
    om(0)=max(5.*ompeak-om(1),om(1))
@@ -992,7 +992,7 @@ Seaways: do
                   write(22) pres2(1:npres,1:nse,iv,imu),fxi(iv,imu),feta(iv,imu),dotxdr(1,imu),dotydr(iv,imu)
                endif
             else  !for further seaways: read transfer functions from unformatted scratch file (faster)
-               read(22) (ybetr2(iart,iv,imu),iart=1,nart)  
+               read(22) (ybetr2(iart,iv,imu),iart=1,nart)
                read(22) pres2(1:npres,1:nse,iv,imu),fxi(iv,imu),feta(iv,imu),dotxdr(1,imu),dotydr(iv,imu)
             endif
          enddo Angles
@@ -1016,7 +1016,7 @@ Seaways: do
                   ampken(i1,iv)=ampken(i1,iv)+dampken*ome**4*bw**2
                   maxdampken(i1,iv)=max(maxdampken(i1,iv),dampken*ome**4*bw**2)
                   if (maxdampken(i1,iv)==dampken*ome**4*bw**2) iommax(i1,iv)=iom
-               endif  
+               endif
             enddo VariousResponses
             WithPressure: if (npres>0) then
                signpres(1:npres,1:nse,iv)=signpres(1:npres,1:nse,iv)+ &
@@ -1156,13 +1156,13 @@ real:: xfin(3,nfinmax)          !3 coordinates of fin force center
 real:: afin(3,nfinmax)          !fin axis direction
 real:: cfin(nfinmax)            !chord length of fin
 real:: cmfin(nfinmax)           !added mass coefficient of fin
-real:: clgrfin(nfinmax)         !d(lift coefficient)/d(attack angle) of fin 
+real:: clgrfin(nfinmax)         !d(lift coefficient)/d(attack angle) of fin
 real:: rfin(nfinmax)            !hull influence factor for fin lift
 real:: sfin(nfinmax)            !hull influence factor for fin angle of attack
 real:: cdfin(nfinmax)           !transverse drag coefficient of fin
 real:: vll(3,3)                 !lower left part of V matrix for intersection forces
 real:: mass(nsemax)             !mass of ship or ship part in front of an intersection
-real:: xg(nsemax),yg(nsemax),zg(nsemax) !coordinates of mass center of gravity 
+real:: xg(nsemax),yg(nsemax),zg(nsemax) !coordinates of mass center of gravity
 real:: xb(nbmax),yb(nbmax),zb(nbmax) !coordinates of motion points
 real:: cdy(nsemax),cdz(nsemax)  !transverse and vertical, resp., ship section resistance coeff.
 real:: rdyzdx(3*nprmax)         !intermediate values to compute the potential at pressure points
@@ -1193,12 +1193,12 @@ real:: muw                      !direction of true wind relative to wave propaga
 real:: rml                      !mass of suspended weight
 real:: xl,yl,zl                 !coordinates of suspension point
 real:: cablelength              !cable length of suspended weight
-real:: testnumber               !used to test whether stored section data fit to input data 
+real:: testnumber               !used to test whether stored section data fit to input data
 real:: waveheight               !wave height for nonlinearities in transfer functions
 real:: vs                       !ship speed
 real:: cosm,sinm                !cos(mu) and sin(mu)
 real:: om                       !wave circular frequency
-real:: ome                      !encounter circular frequency 
+real:: ome                      !encounter circular frequency
 real:: omlow                    !lower limit of om
 real:: fint1b,fint2b            !interpol. factors for encounter frequency (radiation quantities)
 real:: fint1a,fint2a            !interp. factors for wave frequency (diffraction quantities)
@@ -1225,7 +1225,7 @@ real, dimension(3,1):: xaverage !patch center
 complex,parameter:: ci=(0.,1.)  !imaginary unit
 complex:: massmatr(6,6,nsemax)  !mass matrix, total ship and in front of each intersection
 complex:: restorematr(6,6,nsemax+1) !restoration matrix
-complex:: vsmatr(6,6,nsemax)    !V matrix for intersection forces and moments 
+complex:: vsmatr(6,6,nsemax)    !V matrix for intersection forces and moments
 complex:: ciome                 !i omega_e
 complex:: cik                   !i times wave number
 complex:: calda                 !intermediate result in longitudinal force determination
@@ -1261,7 +1261,7 @@ complex:: wbmatr(3,6,nbmax)     !W matrix for motion points (point motion per sh
 complex:: fsec(3,3,nsemax,0:nfremax) !radiation force matrix of sections
 complex,allocatable:: prsec(:,:,:,:) !matrix of radiation pressures in section calculations
 complex,allocatable:: pdsecv(:,:,:)  !matrix of diffraction pressures, 1 section, 1 frequency
-complex,allocatable:: pdsec(:,:,:,:,:) !matrix of diffraction pressures 
+complex,allocatable:: pdsec(:,:,:,:,:) !matrix of diffraction pressures
 complex:: fsecev(3,1,nmumax)    !matrix of diffraction force of a section
 complex:: fksecev(3,1,nmumax)   !matrix of Froude-Krilow force of a section
 complex:: fsece(3,1,nmumax,nsemax,0:nfremax) !matrix of diffr. force of sections, all frequencies
@@ -1313,7 +1313,7 @@ complex:: bfinold(6,6,nfinmax)  !complex added mass matrix of fins, previous ite
 complex:: efinold(6,1,nfinmax)  !complex excitation matrix of fins, previous iteration
 complex:: bfinnew(6,6)          !complex added mass matrix of fins, current iteration
 complex:: addedmfin(6,6)        !added mass matrix due to fin
-complex:: efinnew(6,1)          !excitation force due to fin, current iteration 
+complex:: efinnew(6,1)          !excitation force due to fin, current iteration
 complex:: exfin(6,1)            !excitation force due to fin
 complex:: szw(6,6)              !restoring matrix incl. transom correction
 complex:: lineqmatr(6,7)        !coefficient matrix of linear equation system for motions, 6x6
@@ -1328,7 +1328,7 @@ complex:: sectionforce(6,1)     !intersecction force and moment
 complex:: weightmatr(6,6)       !force, moment on total ship due to weight in modified motion calc.
 complex:: flmo(6,1)             !force and moment of a pressure panel
 complex:: motionmod(6,1)        !modified motions for pressure correction
-complex,allocatable:: pres(:,:,:) !complex pressure amplitudes 
+complex,allocatable:: pres(:,:,:) !complex pressure amplitudes
 complex,allocatable:: pot(:,:)  !complex amplitudes of potential at pressure points
 
 character(80):: text1,skiptext
@@ -1388,7 +1388,7 @@ Intersections: do is=1,ns
    thzz=(thzz+xg(is)**2+yg(is)**2)
    thxy=(thxy+xg(is)*yg(is))
    thyz=(thyz+yg(is)*zg(is))                      !mixed moments of intertia relating to coord. origin
-   thxz=(thxz+xg(is)*zg(is))    
+   thxz=(thxz+xg(is)*zg(is))
    massmatr(:,:,is)=fillrealmatr(6,6,(/             &                            !generate mass matrix
       1.,   0.,     0.,    0.,     zg(is), -yg(is), &
       0.,   1.,     0.,  -zg(is),   0.,     xg(is), &
@@ -1429,7 +1429,7 @@ OffsetSections: do ise=nse,1,-1                                  !integral terms
         b2,   -az*dx+b3,   -b2*x(ise),                 &
    -b1*x(ise), -b2*x(ise),  -az*dx+b1*x(ise)**2,       &
         0.,  x(ise)*area(ise)*dx, ys(ise)*area(ise)*dx  /))*rho*g
-   restorematr(1:6,3:5,ise)=restorematr(1:6,3:5,ise+1)+zwmatr63 
+   restorematr(1:6,3:5,ise)=restorematr(1:6,3:5,ise+1)+zwmatr63
 enddo OffsetSections
 
 OffsetS: do ise=1,nse                                       !contributions not involving x integrals
@@ -1449,13 +1449,13 @@ BodySections: do is=1,ns                                               !contribu
    zwmatr63=fillrealmatr(6,3,(/                &
       0.,       0.,              mass(is),     &
       0.,   -mass(is),            0.,          &
-      0.,       0.,               0.,          & 
+      0.,       0.,               0.,          &
       0.,  zg(is)*mass(is),       0.,          &
       0.,       0.,           mass(is)*zg(is), &
       0., -xg(is)*mass(is),  -mass(is)*yg(is)  /))*g
    restorematr(:,3:5,is)=restorematr(:,3:5,is)+zwmatr63
 enddo BodySections
-write(6,'(a,f8.3)') 'Transverse metacentric height:',real(restorematr(4,4,1))/g/mass(1) 
+write(6,'(a,f8.3)') 'Transverse metacentric height:',real(restorematr(4,4,1))/g/mass(1)
 zwmatr63=fillrealmatr(6,3,(/                 &
   area(1),   ys(1)*area(1),   -x(1)*area(1), &
     0.,            0.,                  0.,  &
@@ -1465,7 +1465,7 @@ zwmatr63=fillrealmatr(6,3,(/                 &
  -ys(1)*area(1),  -ys(1)**2*area(1),    0.   /))*rho*g   !next: add two 0 columns left and one right
 restorekorrmatr=0.
 restorekorrmatr(:,3:5)=zwmatr63
- 
+
 IntersectionPreparation: do is=2,ns
    ise=merge(ise+nse,is-ns+nse, ise<=0)
    vsmatr(:,:,is)=0.
@@ -1477,7 +1477,7 @@ enddo IntersectionPreparation
 read(5,*) nfin             !read fin data: no.,center,axis,control,length,chord,cm,dclda,hullf,anglef
 if (nfin>0) then
    read(5,*)((xfin(k,ifin),k=1,3),(afin(k,ifin),k=1,3),(calfin(k,ifin),k=1,6), &
-   lfin(ifin),cfin(ifin),cmfin(ifin),clgrfin(ifin),rfin(ifin),sfin(ifin),cdfin(ifin),ifin=1,nfin)
+      lfin(ifin),cfin(ifin),cmfin(ifin),clgrfin(ifin),rfin(ifin),sfin(ifin),cdfin(ifin),ifin=1,nfin)
    write(6,'(/'' Data of fin number      '',i2,9i11)') (ifin,ifin=1,nfin)
    write(6,'(1x,131(1h-))')
    write(6,'('' Force center: x    '',10g11.3)') (xfin(1,i),i=1,nfin)
@@ -1486,7 +1486,7 @@ if (nfin>0) then
    write(6,'('' Axis direct.  x    '',10g11.3)') (afin(1,i),i=1,nfin)
    write(6,'(''               y    '',10g11.3)') (afin(2,i),i=1,nfin)
    write(6,'(''               z    '',10g11.3)') (afin(3,i),i=1,nfin)
-   write(6,'('' Fin control angle amplitude / motion amplitude:'')')   
+   write(6,'('' Fin control angle amplitude / motion amplitude:'')')
    write(6,'(''  surge, real:      '',10g11.3)') (real(calfin(1,ifin)),ifin=1,nfin)
    write(6,'(''  surge, imaginary: '',10g11.3)') (aimag(calfin(1,ifin)),ifin=1,nfin)
    write(6,'(''  sway, real:       '',10g11.3)') (real(calfin(2,ifin)),ifin=1,nfin)
@@ -1518,7 +1518,7 @@ Fins: do ifin=1,nfin                                                            
    rnf2=-afin(3,ifin)/zw
    rnf3= afin(2,ifin)/zw
    wfinmatr(:,:,ifin)=fillrealmatr(1,6,(/ 0., rnf2, rnf3, rnf2*xfin(3,ifin)-rnf3*xfin(2,ifin), &
-  -rnf3*(xfin(1,ifin)-0.5*cfin(ifin)), rnf2*(xfin(1,ifin)-0.5*cfin(ifin))/))
+      -rnf3*(xfin(1,ifin)-0.5*cfin(ifin)), rnf2*(xfin(1,ifin)-0.5*cfin(ifin))/))
    bfin(ifin)=0.5*rho*lfin(ifin)*cfin(ifin)*clgrfin(ifin)
    cfinmatr(:,:,ifin)=fillrealmatr(1,6,(/0.,0.,0.,0.,-rnf3,rnf2/))
    skorfin(ifin)=sfin(ifin)*zw
@@ -1645,9 +1645,9 @@ Sections: do ise=1,nse                               !read and interpolate hydro
       read(20,*) (cfsece(i,4:nmu+3),i=1,3)                                            !diffraction forces
       read(20,*) (cfksece(i,1:nmu),i=1,3)                                           !Froude-Krilow forces
       if (npres>0) then                                             !radiation and diffraction pressures
-         read(20,*)(iskip,(cpr(i+npres*j),j=0,2),(cpd(i+npres*j),j=0,nmu-1),i=1,npres) 
+         read(20,*)(iskip,(cpr(i+npres*j),j=0,2),(cpd(i+npres*j),j=0,nmu-1),i=1,npres)
       endif
-      FirstFrequency: if (ifre.eq.1) then   
+      FirstFrequency: if (ifre.eq.1) then
          fsec(1,1,ise,0)=999.                         !special matrices as initial values because of mloga
          prsec(1,1,ise,0)=999.
          pdsecv(1,1,1:nmu)=999.
@@ -1670,8 +1670,8 @@ Sections: do ise=1,nse                               !read and interpolate hydro
    enddo Frequencies
 enddo Sections
 read(20,*) testnumber
-if (abs(npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/))  & 
-    +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot-testnumber)>3e-2) then                  !Soe110406 
+if (abs(npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/))  &
+    +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot-testnumber)>3e-2) then                  !Soe110406
    stop'>> File sectionresults does not fit to input data.'
 end if
 imcorr(1:nmu)=(/(imu,imu=1,nmu)/)            !add encounter angles >90 degrees; maximum <270 degrees
@@ -1760,8 +1760,8 @@ Wavelengths: do iom=1,nom                                                       
                   czeta3(ise)=exp(-cik*x(ise)*cosm)                                     !determine zeta3 (wave)
                   wmatr(:,:,ise)=fillcomplmatr(3,6,(/                                       &
                    (0.,0.),  ciome,  (0.,0.),  (0.,0.),     (0.,0.),      ciome*x(ise)-vs,  &
-                   (0.,0.), (0.,0.),  ciome,   (0.,0.), -ciome*x(ise)+vs,     (0.,0.),      & 
-                   (0.,0.), (0.,0.), (0.,0.),   ciome,      (0.,0.),         (0.,0.)       /))  
+                   (0.,0.), (0.,0.),  ciome,   (0.,0.), -ciome*x(ise)+vs,     (0.,0.),      &
+                   (0.,0.), (0.,0.), (0.,0.),   ciome,      (0.,0.),         (0.,0.)       /))
 
                   ! interpolate section data over ome**2 (radiation) or om**2 (excitation)
                   ! and remove logarithm. ..i = interpolated, ..sec = determined for standard set of om
@@ -1778,9 +1778,9 @@ Wavelengths: do iom=1,nom                                                       
                      else
                         cpfk(i)=-g*rho*cosh(waven*(zint(i,ise)-zbot))/sinh(waven*(zbot-zwl))*exp(ci*waven*yint(i,ise)*sinm)
                         if (ise.eq.nse) then
-						   cpfkbow(i)=-g*rho*cosh(waven*(zint(i,ise)-zbot))/sinh(waven*(zbot-zwl))
+                           cpfkbow(i)=-g*rho*cosh(waven*(zint(i,ise)-zbot))/sinh(waven*(zbot-zwl))
                         endif
-	                 endif
+                     endif
                   enddo FroudeKrilow
                   pw(:,1,ise)=czeta3(ise)*ci/om*(pdi(:,1)+cpfk(:))                  !wave pressure [ ] times rho
                   fki=exp(fint1b*fksece(:,:,im,ise,iomb)+fint2b*fksece(:,:,im,ise,iomb+1))
@@ -1798,13 +1798,13 @@ Wavelengths: do iom=1,nom                                                       
                      pwprev(:,:)=czeta3(ise+1)*ci/om*fillcomplmatr(npres,1,cpfkbow)
                   endif
                   do i=1,npres                                            !phi_y^0, phi_z^0, y.phi_z^0-z.phi_y^0
-                     if (ise.lt.nse) then 
-                        rdyzdx(i        )=(yint(i,ise)-yint(i,ise+1))/dx*vs  
-                        rdyzdx(i+  npres)=(zint(i,ise)-zint(i,ise+1))/dx*vs 
+                     if (ise.lt.nse) then
+                        rdyzdx(i        )=(yint(i,ise)-yint(i,ise+1))/dx*vs
+                        rdyzdx(i+  npres)=(zint(i,ise)-zint(i,ise+1))/dx*vs
                         rdyzdx(i+2*npres)=(yint(i,ise)+yint(i,ise+1))/2*rdyzdx(i+npres) -(zint(i,ise)+zint(i,ise+1))/2*rdyzdx(i)
                      else                                                                     !at foremost section
-                        rdyzdx(i        )=(yint(i,ise)-0.        )/dx*vs  
-                        rdyzdx(i+  npres)=(zint(i,ise)-zint(1,ise))/dx*vs 
+                        rdyzdx(i        )=(yint(i,ise)-0.        )/dx*vs
+                        rdyzdx(i+  npres)=(zint(i,ise)-zint(1,ise))/dx*vs
                         rdyzdx(i+2*npres)=yint(i,ise)*rdyzdx(i+npres)-zint(i,ise)*rdyzdx(i)
                      endif
                   enddo
@@ -1817,7 +1817,7 @@ Wavelengths: do iom=1,nom                                                       
                   endif
                   if (ome.lt.0.) then
                      amatr=conjg(amatr)
-				     pri=conjg(pri)
+                     pri=conjg(pri)
                   endif
                   awmatr=amatr.mprod.wmatr(:,:,ise)
                   dawmatr=vs*(awprev-awmatr)
@@ -1831,7 +1831,7 @@ Wavelengths: do iom=1,nom                                                       
                   dpw=vs/2/dx*(pwprev-pw(:,:,ise))
                   pwprev=pw(:,:,ise)
                   phi0w=0.25*phi0.mprod.(wmatr(:,:,ise)+wmatr(:,:,min(ise+1,nse)))
-                  prg(:,:,ise)=prg(:,:,ise)+phi0w 
+                  prg(:,:,ise)=prg(:,:,ise)+phi0w
                   prg(:,:,min(ise+1,nse))=prg(:,:,min(ise+1,nse))+phi0w         !at foremost section add 2 times
                   if (iab(ise).eq.0) then
                      zwmatr66=vmatr(:,:,ise).mprod.dawmatr
@@ -1843,7 +1843,7 @@ Wavelengths: do iom=1,nom                                                       
                      ex(:,:,1)=ex(:,:,1)+zw1matr61
                      pwg(:,:,ise)=pwg(:,:,ise)+dpw
                      pwg(:,:,min(ise+1,nse))= pwg(:,:,min(ise+1,nse))+dpw
-                     if (ls.and.ise.ne.nse) then 
+                     if (ls.and.ise.ne.nse) then
                         ex(:,:,ise+1)=ex(:,:,ise+1)+0.5*zw1matr61
                      endif
                   endif
@@ -1917,7 +1917,7 @@ Wavelengths: do iom=1,nom                                                       
                   ex(:,:,1)=ex(:,:,1)+calda*czeta3(1)*uvmatr
                endif
               !approximation of longitudinal added mass. uvmatr for last section
-              longaddmass= real(massmatr(1,1,1))/(3.14*sqrt((x(nse)-x(1))**3*rho/real(massmatr(1,1,1)))-14.)*ome**2 
+              longaddmass= real(massmatr(1,1,1))/(3.14*sqrt((x(nse)-x(1))**3*rho/real(massmatr(1,1,1)))-14.)*ome**2
               addedmass(:,:,1)=addedmass(:,:,1)+longaddmass*(uvmatr.mprod.transpose(uvmatr))
            endif FirstIt
 
@@ -1928,7 +1928,7 @@ Wavelengths: do iom=1,nom                                                       
               endif
               if (waven*(zbot-zwl)>3.0) then    !deep water. xfin input system, zwl interior system
                  cvfw=om*exp(cmplx(-waven*(-xfin(3,ifin)-zwl),waven*(-(xfin(1,ifin)-0.5*cfin(ifin))*cosm-  &
-                 xfin(2,ifin)*sinm)))*(wfinmatr(1,2,ifin)*sinm+wfinmatr(1,3,ifin)*ci) 
+                    xfin(2,ifin)*sinm)))*(wfinmatr(1,2,ifin)*sinm+wfinmatr(1,3,ifin)*ci)
               else
                  cvfw=om/sinh(waven*(zbot-zwl)) &                                        !xfin in input system!
                       *exp(ci*waven*(-(xfin(1,ifin)-0.5*cfin(ifin))*cosm-xfin(2,ifin)*sinm))  &
@@ -1977,7 +1977,7 @@ Wavelengths: do iom=1,nom                                                       
                   if (abs(cn)<1.5) sailfactor=sailfactor-0.5*uwindabs*ssail(1:3,isail)*dcndasail(isail)
                   sailfactor(1:3)=sailfactor(1:3)*ciome
                   addedmass(:,:,1)=addedmass(:,:,1)+(rhovsail(:,:,isail).mprod. &
-                  reshape(sailfactor,(/1,3/)).mprod.wsailmatr(:,:,isail))
+                     reshape(sailfactor,(/1,3/)).mprod.wsailmatr(:,:,isail))
                enddo AllSails
             endif IfSails
 
@@ -1993,7 +1993,7 @@ Wavelengths: do iom=1,nom                                                       
                           !correction for motion-dependent force; no influence on intersection forces
             lineqmatr(:,1:6)=-ome**2*massmatr(:,:,1)+szw-addedmass(:,:,1)  !prepare coeff. matr. for motions
                                             ! enlarge system for suspended weight. input coordinates!
-            loadcol= fillrealmatr(6,1,(/0.,-ome**2*rml,0.,-(g-ome**2*(-zl+cablelength))*rml,0.,-ome**2*xl*rml/))  
+            loadcol= fillrealmatr(6,1,(/0.,-ome**2*rml,0.,-(g-ome**2*(-zl+cablelength))*rml,0.,-ome**2*xl*rml/))
             do i=1,nforce                           !for external force depending on suspended weight motion
                loadcol=loadcol-calforce(7,i)*vforcematr(:,:,i)
             enddo
@@ -2020,15 +2020,15 @@ Wavelengths: do iom=1,nom                                                       
 
         write(6,'(1x,131(1h-))')                   !Iteration finished. Output of results
         if (itz.eq.200) write(6,*)'*** questionable accuracy in iteration'
-		write(6,*) 
+        write(6,*)
         write(6,'('' wave circ. frequency'',f6.3)') om
-		write(6,'('' encounter frequency '',f6.3)') ome
-		write(6,'('' wave length         '',f7.2)') 2*pi/waven
-		write(6,'('' wave number         '',f7.4)') waven
-		write(6,'('' wave angle          '',f6.1)') mu(imu)*180/pi
-		write(6,'('' speed               '',f6.2)') vs
-		write(6,'(''  wetted transom?    '',l2)')   ltrwet(iv)
-		write(6,'(''  log(determinant)   '',2f7.2)') cdetl
+        write(6,'('' encounter frequency '',f6.3)') ome
+        write(6,'('' wave length         '',f7.2)') 2*pi/waven
+        write(6,'('' wave number         '',f7.4)') waven
+        write(6,'('' wave angle          '',f6.1)') mu(imu)*180/pi
+        write(6,'('' speed               '',f6.2)') vs
+        write(6,'(''  wetted transom?    '',l2)')   ltrwet(iv)
+        write(6,'(''  log(determinant)   '',2f7.2)') cdetl
 !       write(6,'(/'' Wave circ. frequency'',1f6.3,''  encounter frequ.'', &
 !             &f6.3,''  wave length'',f7.2,''  wave number'',f7.4,''  wave angle'',f6.1/ &
 !             &'' speed '',f6.2,''  wetted transom?        '',l2,''  log(determinant) '',2f7.2)') &
@@ -2127,7 +2127,7 @@ Wavelengths: do iom=1,nom                                                       
               write(24,*) iom,iv,imu,ise
               PressurePts: do i=1,npres
                  write(6,'(2i6,13f10.3)') ise,i,yint(i,ise),zint(i,ise), &
-                   pres(i,1,ise),abs(pres(i,1,ise)),pwg(i,1,ise),abs(pwg(i,1,ise)),pot(i,1)
+                    pres(i,1,ise),abs(pres(i,1,ise)),pwg(i,1,ise),abs(pwg(i,1,ise)),pot(i,1)
                  write(24,*) pres(i,1,ise),pwg(i,1,ise),pot(i,1)
               enddo PressurePts
            enddo Sectns
@@ -2152,13 +2152,13 @@ Wavelengths: do iom=1,nom                                                       
               endif
               fxi=fxi+0.25*(abs(pres(1,1,ise))**2*dystb -abs(pres(npres,1,ise))**2*dyprt)/(rho*g)
               feta=feta+0.25*real((pres(1,1,ise)+pres(npres,1,ise))*exp(cik*x(ise)*cosm)* &
-               (exp(-cik*yint(1,ise)*sinm)-exp(-cik*yint(npres,ise)*sinm)))*(x(ise+1)-x(ise-1))/2
+                 (exp(-cik*yint(1,ise)*sinm)-exp(-cik*yint(npres,ise)*sinm)))*(x(ise+1)-x(ise-1))/2
             enddo ForAllSections
             write(6,'(a,2f10.3)') ' Longitudinal and transverse drift force per wave amplitude squared ', fxi,feta
             kd=min(waven*(zbot-zwl),30.)                       !k times water depth in case of shallow water
             xdotdr=0.5*waven*om*(cosh(2*(waven*(zdrift-zwl)-kd))/sinh(kd)**2 -1./(waven*(zbot-zwl)*tanh(waven*(zbot-zwl))))
             write(6,'(a,2f10.3)') ' Long., transv. reduced water drift velocity per wave amplitude^2   ', &
-            xdotdr*cosm,-xdotdr*sinm
+               xdotdr*cosm,-xdotdr*sinm
             write(24,*) fxi,feta,xdotdr*cosm,-xdotdr*sinm
          endif IfPressure
       enddo WaveDir
