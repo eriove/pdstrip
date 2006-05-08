@@ -1,9 +1,10 @@
 # You can get a compiler binary from http://gcc.gnu.org/wiki/GFortranBinaries
 # or http://ftp.g95.org/ or ftp://download.intel.com/software/products/compilers/downloads/
 
-FC = gfortran
+# Causes run-time error (end of file reading offset file)
+#FC = gfortran
 
-#FC = g95
+FC = g95
 
 #FC = ifort
 FFLAGS = -g
