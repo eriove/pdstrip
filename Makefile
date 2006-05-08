@@ -24,6 +24,7 @@ dist-clean: clean
 	cd examples; $(MAKE) $@
 	cd windows; $(MAKE) $@
 
+# NOTE do a svn update first, to kick svn info into the right revision.
 # Archives are created in the parent directory
 dist:
 	REVISION=`svn info|egrep "^Revision"|sed "s/Revision: //"`;\
