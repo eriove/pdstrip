@@ -4,7 +4,8 @@
 ! This is Free Software. For license terms, see the LICENSE file.
 
 module pdstripsubprograms
-implicit none
+!implicit none                   !BNV/2006-05-08 there are implicit variables at lines
+                                 ! 713, 720, 730 and 743
 
 integer, parameter:: nmumax=100  !max. number of wave angles, regular waves
 integer, parameter:: nofmax=240  !max. number of offset points on a section and the free surface
@@ -49,6 +50,8 @@ character(80):: text             !text describing the ship and its loading case
 character(80):: offsetfile       !name of the file containing the offset point data
 ! GT/2006-04-28
 character(LEN = 128) :: pathName = ' ', fileName = 'pdstrip' ! used to make GUI in Windows work
+
+real, dimension(:), allocatable :: yofTemp, zofTemp   ! GT/2006-05-03: additional code to facilitate Salford FTN95 compiler
 
 interface operator(.mprod.); module procedure prodmatr; end interface !matrix product
 interface operator(.vprod.); module procedure vectprod; end interface !vector product
@@ -155,8 +158,15 @@ Sections: do ise=1,nse
    endif
 enddo Sections
 if (lsect) then
-   write(20,*) npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/)) &
-      +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot    !test number for unchanged input data
+! GT/2006-05-03: original code commented out and replaced by code to facilitate Salford FTN95 compiler
+!   write(20,*) npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/)) &
+!      +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot    !test number for unchanged input data
+  allocate(yofTemp(1:nse)); allocate(zofTemp(1:nse))                                              ! GT/2006-05-03
+  do ise = 1, nse                                                                                 ! GT/2006-05-03
+    yofTemp(ise) = sum((/(yof(ise,1:nof(ise)))/)); zofTemp(ise) = sum((/(zof(ise,1:nof(ise)))/))  ! GT/2006-05-03
+  end do                                                                                          ! GT/2006-05-03
+  write(20,*) npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum(yofTemp)+sum(zofTemp)+g+rho+zwl+1/zbot    ! GT/2006-05-03
+  deallocate(yofTemp); deallocate(zofTemp)                                                        ! GT/2006-05-03
 end if
 end subroutine sectiondata
 
@@ -1223,6 +1233,8 @@ real, dimension(3,1):: fl       !patch area vector (normal on patch)
 real, dimension(3,1):: xaverage !patch center
 
 complex,parameter:: ci=(0.,1.)  !imaginary unit
+complex:: BNVtemp1(6,1)         !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler
+complex:: BNVtemp2(3,1)         !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler
 complex:: massmatr(6,6,nsemax)  !mass matrix, total ship and in front of each intersection
 complex:: restorematr(6,6,nsemax+1) !restoration matrix
 complex:: vsmatr(6,6,nsemax)    !V matrix for intersection forces and moments
@@ -1670,10 +1682,17 @@ Sections: do ise=1,nse                               !read and interpolate hydro
    enddo Frequencies
 enddo Sections
 read(20,*) testnumber
-if (abs(npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/))  &
-    +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot-testnumber)>3e-2) then                  !Soe110406
+! GT/2006-05-03: original code commented out and replaced by code to facilitate Salford FTN95 compiler
+!if (abs(npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum((/(yof(ise,1:nof(ise)),ise=1,nse)/))  & 
+!    +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot-testnumber)>3e-2) then                  !Soe110406        
+allocate(yofTemp(1:nse)); allocate(zofTemp(1:nse))                                                              ! GT/2006-05-03
+do ise = 1, nse                                                                                                 ! GT/2006-05-03
+   yofTemp(ise) = sum((/(yof(ise,1:nof(ise)))/)); zofTemp(ise) = sum((/(zof(ise,1:nof(ise)))/))                 ! GT/2006-05-03
+end do                                                                                                          ! GT/2006-05-03
+if (abs(npres+sum(wangl(1:nmu))+sum(x(1:nse))+sum(yofTemp)+sum(zofTemp)+g+rho+zwl+1/zbot-testnumber)>3e-2) then ! GT/2006-05-03
    stop'>> File sectionresults does not fit to input data.'
 end if
+deallocate(yofTemp); deallocate(zofTemp)                                                                        ! GT/2006-05-03
 imcorr(1:nmu)=(/(imu,imu=1,nmu)/)            !add encounter angles >90 degrees; maximum <270 degrees
 i1=merge(1,0,abs(mu(nmu)-pi/2).lt.0.001)
 i2=merge(1,0,abs(mu(1  )+pi/2).lt.0.001)
@@ -1860,7 +1879,10 @@ Wavelengths: do iom=1,nom                                                       
                   awmatr=-ciome*awmatr
                   prg(:,:,ise)=prg(:,:,ise)-ciome*prw(:,:,ise)
                   addedmass(:,:,1)=addedmass(:,:,1)+(x(ise+1)-x(ise-1))/2.*(vmatr(:,:,ise).mprod.awmatr)
-                  ex(:,:,1)=ex(:,:,1)+(x(ise+1)-x(ise-1))/2.*czeta3(ise)*(vmatr(:,:,ise).mprod.(fki+ome/om*fdi))
+                  !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler
+                  !ex(:,:,1)=ex(:,:,1)+(x(ise+1)-x(ise-1))/2.*czeta3(ise)*(vmatr(:,:,ise).mprod.(fki+ome/om*fdi))
+                  BNVtemp1=vmatr(:,:,ise).mprod.(fki+ome/om*fdi)                    !BNV/2006-05-08
+                  ex(:,:,1)=ex(:,:,1)+(x(ise+1)-x(ise-1))/2.*czeta3(ise)*BNVtemp1   !BNV/2006-05-08
                   pwg(:,:,ise)=pwg(:,:,ise)-ciome*pw(:,:,ise)
                   pst(:,:,ise)=0.
                   pst(1:npres,3,ise)=1.
@@ -1893,8 +1915,12 @@ Wavelengths: do iom=1,nom                                                       
                    0.5*rho*vcross*wdy*tcross(ise)*cdy(ise),    &
                    0.5*rho*vcross*wdz*bcross(ise)*cdz(ise),    &
                                     (0.,0.)                  /))
-                  exchge=exchge+(x(ise+1)-x(ise-1))/2.*(vmatr(:,:,ise).mprod. &
-                         (ecross(:,:,ise)-ecrossold(:,:,ise)))
+                  !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler                  
+                  !exchge=exchge+(x(ise+1)-x(ise-1))/2.*(vmatr(:,:,ise).mprod. &
+                  !       (ecross(:,:,ise)-ecrossold(:,:,ise)))
+                  BNVtemp2=ecross(:,:,ise)-ecrossold(:,:,ise)         !BNV/2006-05-08
+                  BNVtemp1=vmatr(:,:,ise).mprod.BNVtemp2              !BNV/2006-05-08
+                  exchge=exchge+(x(ise+1)-x(ise-1))/2.*BNVtemp1       !BNV/2006-05-08
                endif FirstIteration
                if (itz.eq.1) then
                   if (ls.and.ise.ne.1) then
@@ -2074,8 +2100,11 @@ Wavelengths: do iom=1,nom                                                       
            AllIntersections: do ise=2,nse
               is=ise
               xs=(x(ise)+x(ise-1))/2.
-              sectionforce=vsmatr(:,:,is).mprod.&
-                 (((restorematr(:,:,is)-addedmass(:,:,is)-ome**2*massmatr(:,:,is)).mprod.motion)-ex(:,:,is))
+              !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler                  
+              !sectionforce=vsmatr(:,:,is).mprod.&
+              !   (((restorematr(:,:,is)-addedmass(:,:,is)-ome**2*massmatr(:,:,is)).mprod.motion)-ex(:,:,is))
+              BNVtemp1=((restorematr(:,:,is)-addedmass(:,:,is)-ome**2*massmatr(:,:,is)).mprod.motion)-ex(:,:,is)  !BNV/2006-05-08
+              sectionforce=vsmatr(:,:,is).mprod.BNVtemp1                                                          !BNV/2006-05-08
               write(6,'('' Force '',f7.2,f12.3,2f13.3,2(1x,3f13.3))') xs,(sectionforce(i,1),abs(sectionforce(i,1)),i=1,3)
               write(6,'('' Moment  '',3x,3(1x,3f13.3))') (sectionforce(i,1),abs(sectionforce(i,1)),i=4,6)
               write(21,*) (betr2(sectionforce(i,1)),i=1,6)
@@ -2114,7 +2143,10 @@ Wavelengths: do iom=1,nom                                                       
               enddo PressurePoints
            enddo Sect
            lineqmatr(:,1:6)=fprou
-           lineqmatr(:,7:7)=fwithoutu+ome**2*(massmatr(:,:,1).mprod.motion)
+           !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler                  
+           !lineqmatr(:,7:7)=fwithoutu+ome**2*(massmatr(:,:,1).mprod.motion)
+           BNVtemp1=massmatr(:,:,1).mprod.motion                          !BNV/2006-05-08
+           lineqmatr(:,7:7)=fwithoutu+ome**2*BNVtemp1                     !BNV/2006-05-08
            lineqmatr(1,:)=(/(-1.,0.),(0.,0.),(0.,0.),(0.,0.),(0.,0.),(0.,0.),motion(1,1)/)
            call simqcd(lineqmatr,6,1,6,ks,1.e-6,cdetl)   !solve for modified motions
            if (ks.ne.0) stop'>> Singular system of equations for modified motion'
