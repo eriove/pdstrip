@@ -1,4 +1,4 @@
-!Last modification April 2014
+!Last modification December 2014
 module pdstripsubprograms
 implicit none
 
@@ -1248,6 +1248,7 @@ real:: flvec(3)                 !area vector of triangle
 real:: df(3)                    !drift force part on triangle
 real:: mdrift(3)                !drift moment, 3 components
 real:: dx2                      !distance between offset sections
+real:: dfxistb,dfxiprt,dfeta    !Anteile Driftkraft
 
 complex,parameter:: ci=(0.,1.)  !imaginary unit
 complex:: BNVtemp1(6,1)         !BNV/2006-05-08: additional code to facilitate Salford FTN95 compiler
@@ -1273,7 +1274,6 @@ complex:: cvfs                  !velocity amplitude of a fin due to ship motion
 complex:: calforce(7,nforcemax) !motion-dependent force per motion amplitude & load transv. ampl.
 complex:: cym,cymabs            !transverse motion ampl. of suspended load rel. to ship and earth
 complex:: sailfactor(3)         !intermediate result for sail force
-complex:: cxis,cetas,czetas     !motion of mass center of gravity in 3 directions
 complex:: zwmatr63(6,3)         !intermediate matrix results
 complex:: restorekorrmatr(6,6)  !correction of restoring matrix for non-wetted transom
 complex:: wfinmatr(1,6,nfinmax) !W matrix for fin (changes ship motion to fin motion normal to fin)
@@ -1299,7 +1299,7 @@ complex:: geprev(3,1)           !diffraction force of previous section
 complex,allocatable:: prwprev(:,:) !matrix of rad. pressure*w of previous section
 complex:: motion(6,1)           !ship motion amplitudes per unit wave amplitude
 complex:: motion1(6,1)          !motions ampl. of previous iteration step for the given wave height
-complex:: addedmass(6,6,nsemax) !added mass matrix of ship and parts in front of intersection*ome^2
+complex:: addedmass(6,6,nsemax) !(added mass matrix of ship and parts in front of intersection)*ome^2
 complex:: addedmasschge(6,6)    !change of total added mass matrix due to one section
 complex:: exchge(6,1)           !change of total excitation due to one section
 complex:: ncrossold(3,3,nsemax) !cross-flow damping, previous iteration step
@@ -1357,6 +1357,7 @@ complex,allocatable:: pres(:,:,:) !complex pressure amplitudes
 complex,allocatable:: pot(:,:)  !complex amplitudes of potential at pressure points
 complex:: gradpot(3)            !gradient of complex potential
 complex:: theta(3,3)            !inertia matrix about G; complex to allow product with motion
+complex:: presaverage           !average pressure in triangle
 
 character(80):: text1
 
@@ -1963,10 +1964,10 @@ Wavelengths: do iom=1,nom                                                       
       ex(:,:,1)=ex(:,:,1)+calda*czeta3(1)*uvmatr
      endif
      !approximation of longitudinal added mass. uvmatr for last section
-     longaddmass= &
+     longaddmass= &                                                       !long. added mass * ome**2
       real(massmatr(1,1,1))/(3.14*sqrt((x(nse)-x(1))**3*rho/real(massmatr(1,1,1)))-14.)*ome**2 
      addedmass(:,:,1)=addedmass(:,:,1)+longaddmass*(uvmatr.mprod.transpose(uvmatr))
-     !print *,'#6',longaddmass
+     !print *,'#6',longaddmass,longaddmass*(uvmatr.mprod.transpose(uvmatr))
     endif FirstIt
     ForFins: do ifin=1,nfin               !influence of fins; including quadratical force components
      if (itz.eq.1) then
@@ -2145,37 +2146,29 @@ Wavelengths: do iom=1,nom                                                       
      enddo PressurePts
     enddo Sectns
     !Determine drift forces (only if npres>0)
-    cxis  =motion(1,1)-yg(1)*motion(6,1)+zg(1)*motion(5,1)           !long. motion of c.o.g. of mass
-    cetas =motion(2,1)-zg(1)*motion(4,1)+xg(1)*motion(6,1)         !transv. motion of c.o.g. of mass
-    czetas=motion(3,1)-xg(1)*motion(5,1)+yg(1)*motion(4,1)        !vertical motion of c.o.g. of mass
-    fxi=0.5*mass(1)*ome**2*real(cetas*conjg(motion(6,1))-czetas*conjg(motion(5,1)))  !long.drift f.
-    feta=-0.5*mass(1)*ome**2*real(cxis*conjg(motion(6,1)))                  !transverse drift force
-    if(.not.ltrwet(iv)) &
-     fxi=fxi+0.25*rho*g*(abs(motion(4,1))**2+abs(motion(5,1))**2)*area(1)*(zs(1)-zwl)
-    mdrift=-0.5*ome**2*real(conjg(motion(4:6,1)).vprod.reshape(theta.mprod.motion(4:6,1:1),(/3/)))
-    ForAllSections: do ise1=1,nse                                               !relative-motion term
+    fxi=0; feta=0; mdrift=0
+    ForAllSections: do ise1=1,nse
      dx2=(x(min(ise1+1,nse))-x(max(ise1-1,1)))/2
      if (ise1==1) then
       dystb=merge((yint(1,2)+yint(1,1))/2,(yint(1,2)-yint(1,1))/2,ltrwet(iv))              !for starboard
       dyprt=merge((yint(npres,2)+yint(npres,1))/2,(yint(npres,2)-yint(npres,1))/2,ltrwet(iv))   !for port
      elseif (ise1==nse) then
-      dystb=((yint(1,nse)+yint(npres,nse))/2-(yint(1,nse-1)+yint(1,nse)))/2    !wl breadth zero at stem
+      dystb=((yint(1,nse)+yint(npres,nse))/2-(yint(1,nse-1)+yint(1,nse)))/2      !wl breadth zero at stem
       dyprt=((yint(1,nse)+yint(npres,nse))/2-(yint(npres,nse-1)+yint(npres,nse)))/2
-     else                                                                          !not at ship ends
+     else                                                                               !not at ship ends
       dystb=(yint(1,ise1+1)-yint(1,ise1-1))/2
       dyprt=(yint(npres,ise1+1)-yint(npres,ise1-1))/2
      endif
-     fxi=fxi+0.25*(abs(pres(1,1,ise1))**2*dystb -abs(pres(npres,1,ise1))**2*dyprt)/(rho*g)
-     feta=feta+0.25*real((pres(1,1,ise1)+pres(npres,1,ise1))*exp(cik*x(ise1)*cosm)* &
-      (exp(-cik*yint(1,ise1)*sinm)-exp(-cik*yint(npres,ise1)*sinm)))*dx2
-     mdrift=mdrift+0.25/(rho*g)*(((/x(ise1)-xg(1),yint(1,ise1)-yg(1),zint(1,ise1)-zg(1)/) &
-      .vprod.(abs(pres(1,1,ise1))**2*((/-dx2,-dystb,0./).vprod.(/0.,0.,-1./)))) &
-                        +((/x(ise1)-xg(1),yint(npres,ise1)-yg(1),zint(npres,ise1)-zg(1)/) &
-      .vprod.(abs(pres(npres,1,ise1))**2*((/dx2,dyprt,0./).vprod.(/0.,0.,-1./)))))
+     dfxistb= 0.25*abs(pres(    1,1,ise1))**2*dystb/rho/g          !relative motion terms to drift forces
+     dfxiprt=-0.25*abs(pres(npres,1,ise1))**2*dyprt/rho/g
+     fxi=fxi+dfxistb+dfxiprt
+     dfeta=0.25*dx2*(-abs(pres(1,1,ise1))**2+abs(pres(npres,1,ise1))**2)/rho/g
+     feta=feta+dfeta
+     mdrift=mdrift+x(ise1)*dfeta-yint(1,ise1)*dfxistb-yint(npres,ise1)*dfxiprt
      if(ise1==1)cycle
-     !Part of drift force due to square of periodical velocity
-     is1=ise1-1; is2=ise1; 
-     PressureTriangles: do i=2,npres; do j=1,2                  !for 2 triangles per hull quadrilateral
+     !Part of drift force due to square of periodical velocity and due to hull rotations
+     is1=ise1-1; is2=ise1
+     PressureTriangles: do i=2,npres; do j=1,2                    !for 2 triangles per hull quadrilateral
       if(j==1)then; ip1=i-1; ip2=i-1; is3=merge(is2,is1,i<=npres/2+1); ip3=i
       else
        ip1=merge(i-1,i,i<=npres/2+1); ip2=merge(i,i-1,i<=npres/2+1); is3=merge(is1,is2,i<=npres/2+1); ip3=i
@@ -2184,23 +2177,21 @@ Wavelengths: do iom=1,nom                                                       
       xtri(:,2)=(/x(is2),yint(ip2,is2),zint(ip2,is2)/)
       xtri(:,3)=(/x(is3),yint(ip3,is3),zint(ip3,is3)/)
       xc=sum(xtri,2)/3
-      xn=(xtri(:,2)-xtri(:,1)).vprod.(xtri(:,3)-xtri(:,1)); xn=xn/sqrt(sum(xn**2))  !unit normal vector
+      flvec=0.5*(xtri(:,1)-xtri(:,3)).vprod.(xtri(:,2)-xtri(:,1))
+      xn=flvec/sqrt(sum(flvec**2))                                                    !unit normal vector
       gradvec=graddreieck(xtri)
       gradpot=(pot(ip1,is1)-pot(ip3,is3))*gradvec(:,1)+(pot(ip2,is2)-pot(ip1,is1))*gradvec(:,2) &
-       +ciome*(motion(1:3,1)+(motion(4:6,1).vprod.cmplx(xc,(/0.,0.,0./))))*xn  !tangential and normal comp.
-      flvec=0.5*(xtri(:,1)-xtri(:,3)).vprod.(xtri(:,2)-xtri(:,1))
-      df=-0.25*rho*sum(abs(gradpot)**2)*flvec
+       +ciome*(motion(1:3,1)+(motion(4:6,1).vprod.cmplx(xc,(/0.,0.,0./))))*xn !tangential and normal comp.
+      presaverage=(pres(ip1,1,is1)+pres(ip2,1,is2)+pres(ip3,1,is3))/3
+      df=-0.25*rho*sum(abs(gradpot)**2)*flvec &                                    !squared velocity term
+         -0.5*real((presaverage*flvec).vprod.conjg(motion(4:6,1)))                !rotation/pressure term
       fxi=fxi+df(1)
       feta=feta+df(2)
-      mdrift=mdrift+(sum(xtri(1,:))/3-xg(1))*df(2)-(sum(xtri(2,:))/3-yg(1))*df(1) !noch bezogen auf G
+      mdrift=mdrift+xc(1)*df(2)-xc(2)*df(1)                                              !bezogen auf O
       if(count((/ip1,ip2,ip3/)==npres)==2)exit PressureTriangles
-      if(is3==is1)then; ip1=ip3; else; ip2=ip3; endif                    !preparation for next triangle
+      if(is3==is1)then; ip1=ip3; else; ip2=ip3; endif      !preparation for next triangle. Wieso nötig?
      enddo; enddo PressureTriangles
-    enddo ForAllSections
-    mdrift(3)=mdrift(3)+xg(1)*feta-yg(1)*fxi
-    !if (rla(iom)<x(nx)-x(1).and.cosm<0) &
-    ! fxi=min(fxi,-2*rho*g*maxval(yint(1,1:nx)-yint(npres,1:nx))**2 &
-    ! /(x(nx)-x(1))*cosm**2)                              !correction for short waves; normally fxi<0
+    enddo ForAllSections    
     findriftf=0
     FinDriftForce: do ifin=1,nfin    
      calphas1=-ciome*sum(wfinmatr(1,:,ifin)*motion(:,1))*rfin(ifin)/(vs+1e-5) 
@@ -2213,14 +2204,6 @@ Wavelengths: do iom=1,nom                                                       
      findriftf=findriftf+0.5*rfin(ifin)*(real(wfinmatr(1,1:3,ifin)).vprod.real(motion(4:6,1)*cffast))
      findriftf(1)=findriftf(1)-bfin(ifin)*vs**2*clgrfin(ifin)/2/pi/lambdaeff(ifin) &
       *abs(calphaw(ifin)+calphas1+calphas2+calphas3)**2
-     !write(6,*)'test0',wfinmatr(:,:,ifin)
-     !write(6,*)'test1',ifin,motion
-     !write(6,*)'test2',calphaw(ifin),calphas1,calphas2,calphas3,cffast
-     !write(6,*)'test3',0.5*real((calphaw(ifin)+calphas1)*cffast)
-     !write(6,*)'test4',0.5*rfin(ifin)*(real(wfinmatr(1,1:3,ifin)).vprod.real(motion(4:6,1)*cffast))
-     !write(6,*)'test5',-bfin(ifin)*vs**2*clgrfin(ifin)/2/pi/lambdaeff(ifin) &
-     ! *abs(calphaw(ifin)+calphas1+calphas2+calphas3)**2
-     !write(6,*)'test6',findriftf
     enddo FinDriftForce
     fxi=fxi+findriftf(1); feta=feta+findriftf(2)
     write(6,'(a,2f10.3)')' Longitudinal and transverse drift force per wave amplitude squared ', &
@@ -2238,3 +2221,4 @@ Wavelengths: do iom=1,nom                                                       
 enddo Wavelengths
 call signampl                       !calculate significant amplitudes in natural seaways if required
 end program pdstrip
+
