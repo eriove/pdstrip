@@ -145,7 +145,7 @@ Sections: do ise=1,nse
  yof1(1:nof(ise))=yof(ise,1:nof(ise)); zof1(1:nof(ise))=zof(ise,1:nof(ise))
  if (lsect) then
   output=ise==18
-  call sectionhydrodynamics(nof(ise),yof1,zof1,nfre,om,addedm,diff,frkr,pr)
+  call sectionhydrodynamics(nof(ise),yof1,zof1,nfre,om,addedm,diff,frkr,pr,sym)
   Frequencies: do i=1,nfre  
    write(20,*)om(i),nmu,wangl(1:nmu)*pi/180                 !store on file sectionresults: wave data
    write(20,*)(om(i)**2*addedm(j,1:3,i),j=1,3)                                      !radiation force
@@ -161,7 +161,7 @@ if (lsect) &
  +sum((/(zof(ise,1:nof(ise)),ise=1,nse)/))+g+rho+zwl+1/zbot    !test number for unchanged input data
 end subroutine sectiondata
 
-subroutine sectionhydrodynamics(nof1,yof1,zof1,nfre,om,addedm,diff,frkr,pr)
+subroutine sectionhydrodynamics(nof1,yof1,zof1,nfre,om,addedm,diff,frkr,pr,sym)
 integer, intent(in):: nof1             !number of offset points on one section
 integer:: nfre                         !number of wave frequencies 
 integer:: i,ii                         !indices
@@ -179,8 +179,9 @@ complex:: addedmprel(2,2)              !preliminary added mass matrix (1 or 2 de
 complex:: diffprel(2,nmumax)           !preliminary diffraction force
 complex:: frkrprel(2,nmumax)           !preliminary Froude-Krilow force
 complex:: pr(nprmax,3+nmumax,nfremax)  !pressure amplitudes
+logical::sym
 if (nfre.gt.nfremax) call stop1('Too many frequencies')
-call testsuitability(nof1,yof1,zof1)                            !discretization of section suitable?
+call testsuitability(nof1,yof1,zof1,sym)                            !discretization of section suitable?
 girth(1)=0.
 do i=2,nof1
  if (ngap>0.and.any(gap(1:ngap)==i-1)) then 
@@ -625,7 +626,7 @@ twofreesurfacediscretisations: do nf=25,28,3                   !uses two values 
 enddo TwoFreeSurfaceDiscretisations
 end subroutine addedmassexcitations
 
-subroutine testsuitability(nof1,yof1,zof1)
+subroutine testsuitability(nof1,yof1,zof1,sym)
 ! Tests whether body sources (locally 1/20 panel length inside section contour) are globally inside
 ! of contour and outside of inner contour being locally 1/9 panel length inside contour
 integer, intent(in):: nof1             !no. of offset points on one section
@@ -640,7 +641,8 @@ real:: yq,zq                           !y, z of sources
 real:: yof2(nofmax),zof2(nofmax)       !y, z of original offset points (possibly of half section)
 real:: angle                           !angle under which section contour is seen from a source
 real:: ay,az,by,bz                     !y, z coordinate difference between source and offset point 
-if(abs(zof1(1)-zof1(nof1))>1e-4)call stop1('First and last z of a section differ')
+logical:: sym
+if(.not.sym.and.(abs(zof1(1)-zof1(nof1))>1e-4))call stop1('First and last z of a section differ')
 yof(1:nof1)=yof1(1:nof1); zof(1:nof1)=zof1(1:nof1)
 yof(nof1+1)=0.; zof(nof1+1)=-1e5                                 !additional point high above waterline
 TwoTimes: do j=1,2 !Test whether sources inside contour; then interior parallel whether sources outside
